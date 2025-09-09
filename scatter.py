@@ -132,4 +132,137 @@ def linear_regression():
     plt.show()
 
 
-linear_regression()
+def plot_all_data():
+    # Open the Zarr store
+    ds = xr.open_zarr("variables_together.zarr", consolidated=True)
+
+    # Drop lat and lon from the dataset (if they are coordinates or variables)
+    variables_to_plot = [var for var in ds.data_vars if var not in ["lat", "lon"]]
+
+    # Plot each variable with respect to time
+    for var in variables_to_plot:
+        data = ds[var]
+
+        # Reduce over spatial dimensions if present (e.g., mean over lat/lon)
+        if 'lat' in data.dims and 'lon' in data.dims:
+            data = data.mean(dim=['lat', 'lon'])
+        elif 'lat' in data.dims:
+            data = data.mean(dim='lat')
+        elif 'lon' in data.dims:
+            data = data.mean(dim='lon')
+
+        # Plotting
+        plt.figure(figsize=(10, 4))
+        data.plot()
+        plt.title(f"{var} over time")
+        plt.xlabel("Time")
+        plt.ylabel(var)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+
+def just_plot_one_variable():
+
+    # Open the Zarr store
+    ds = xr.open_zarr("merged_output.zarr", consolidated=True)
+
+    # Extract the variable
+    data = ds["TOTEXTTAU"]
+
+    # Average over spatial dimensions if they exist
+    if 'lat' in data.dims and 'lon' in data.dims:
+        data = data.mean(dim=['lat', 'lon'])
+    elif 'lat' in data.dims:
+        data = data.mean(dim='lat')
+    elif 'lon' in data.dims:
+        data = data.mean(dim='lon')
+
+    # Plot
+    plt.figure(figsize=(10, 4))
+    data.plot()
+    plt.title("TOTEXTTAU over time")
+    plt.xlabel("Time")
+    plt.ylabel("TOTEXTTAU")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+def just_plot_india():
+
+    # Open Zarr dataset
+    ds = xr.open_zarr("merged_output.zarr", consolidated=True)
+
+    # Subset for India: lat 6–38N, lon 68–98E
+    ds_india = ds.sel(lat=slice(6, 38), lon=slice(68, 98))
+
+    # Choose variables except 'lat' and 'lon'
+    variables_to_plot = [var for var in ds_india.data_vars if var not in ['lat', 'lon']]
+
+    # Plot all variables over time (averaged over space)
+    for var in variables_to_plot:
+        data = ds_india[var]
+
+        # Average over spatial dimensions
+        if 'lat' in data.dims and 'lon' in data.dims:
+            data = data.mean(dim=['lat', 'lon'])
+        elif 'lat' in data.dims:
+            data = data.mean(dim='lat')
+        elif 'lon' in data.dims:
+            data = data.mean(dim='lon')
+
+        # Plot
+        plt.figure(figsize=(10, 4))
+        data.plot()
+        plt.title(f"{var} over time (India region)")
+        plt.xlabel("Time")
+        plt.ylabel(var)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+def just_plot_uk():
+
+    # Open Zarr dataset
+    ds = xr.open_zarr("merged_output.zarr", consolidated=True)
+
+    # Subset for UK: lat 49–61N, lon -11–2E
+    ds_uk = ds.sel(lat=slice(49, 61), lon=slice(-11, 2))
+
+    # Select all variables except lat and lon
+    variables_to_plot = [var for var in ds_uk.data_vars if var not in ['lat', 'lon']]
+
+    # Plot each variable over time (averaged over space)
+    for var in variables_to_plot:
+        data = ds_uk[var]
+
+        # Average over spatial dimensions
+        if 'lat' in data.dims and 'lon' in data.dims:
+            data = data.mean(dim=['lat', 'lon'])
+        elif 'lat' in data.dims:
+            data = data.mean(dim='lat')
+        elif 'lon' in data.dims:
+            data = data.mean(dim='lon')
+
+        # Plot
+        plt.figure(figsize=(10, 4))
+        data.plot()
+        plt.title(f"{var} over time (United Kingdom)")
+        plt.xlabel("Time")
+        plt.ylabel(var)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+
+def figure_out_degree_format():
+    # Open the Zarr dataset
+    ds = xr.open_zarr("merged_output.zarr", consolidated=True)
+
+    # Print the first few values of lat and lon
+    print("Latitude values:")
+    print(ds['lat'].values[:10])
+
+    print("\nLongitude values:")
+    print(ds['lon'].values[:10])
